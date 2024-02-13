@@ -10,19 +10,18 @@ module.exports = {
 
 	mongo: {
 
-		URL: (process.env.DBURL || 'mongodb+srv://gelc:g31c@development-w2srz.mongodb.net/gelcdb?retryWrites=true&w=majority'),
+		URL: (process.env.DBURL || 'mongodb+srv://admin:admin@cluster0.ozqkntq.mongodb.net/'),
 
 	},
 
 	jwt: {
 		
-		SECRET: (process.env.JWTSECRET || 'ufersa'),
+  SECRET: (process.env.JWTSECRET || 'ufersa'),
 		TOKEN_EXP_TIME: (process.env.TOKEN_EXP_TIME || 3600)
 	
 	},
 
 	email: {
-		
 		SERVICE: (process.env.EMAILSERVICE || 'gmail'),
 		USER: (process.env.EMAILUSER),
 		PASS: (process.env.EMAILPASS)
