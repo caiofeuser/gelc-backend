@@ -25,7 +25,7 @@ module.exports = {
 		SERVICE: (process.env.EMAILSERVICE || 'gmail'),
 		USER: (process.env.EMAILUSER),
 		PASS: (process.env.EMAILPASS)
-
+    
 	},
 
 	cors: {

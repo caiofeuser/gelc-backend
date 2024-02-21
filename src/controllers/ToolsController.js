@@ -1,4 +1,4 @@
-const Download = require("../models/Download");
+﻿const Tools = require("../models/Tools");
 
 module.exports = {
   async index(req, res) {
@@ -7,13 +7,12 @@ module.exports = {
     try {
       let options = {
         page,
-        populate: { path: "image", select: "-to -toModel" },
         limit: 4,
       };
 
       let query = search ? { $text: { $search: search } } : {};
 
-      let docs = await Download.paginate(query, options);
+      let docs = await Tools.paginate(query, options);
 
       if (!docs || docs.length === 0) {
         return res.status(404).send({ message: "no documents not found" });
@@ -29,7 +28,7 @@ module.exports = {
     const id = req.params.id;
 
     try {
-      const doc = await Download.findById(id);
+      const doc = await Tools.findById(id);
 
       if (!doc) {
         return res.status(404).send({ message: "no documents not found" });
@@ -51,7 +50,7 @@ module.exports = {
     }
 
     try {
-      let doc = await Download.create({ title, description, url });
+      let doc = await Tools.create({ title, description, url });
       return res.status(201).send(doc);
     } catch (err) {
       return res.status(500).send({ message: "could not save this object" });
@@ -62,18 +61,15 @@ module.exports = {
     const { id } = req.params;
 
     try {
-      let doc = await Download.findByIdAndDelete(id);
+      let doc = await Tools.findByIdAndDelete(id);
 
       if (!doc) {
         return res.status(404).send({ message: "no documents not found" });
       }
-
-      return res.send();
     } catch (err) {
-      return res.status(500).send({ message: "unable to retrieve data" });
+      return res.status(500).send({ message: "could not delete this object" });
     }
   },
-
   async update(req, res) {
     let id = req.params.id;
 
@@ -86,18 +82,15 @@ module.exports = {
     delete req.body.image;
 
     try {
-      let doc = await Download.findByIdAndUpdate(id, req.body, {
+      let doc = await Tools.findByIdAndUpdate(id, req.body, {
         new: true,
-        runValidators: true,
       });
 
       if (!doc) {
         return res.status(404).send({ message: "no documents not found" });
       }
-
-      return res.send(doc);
     } catch (err) {
-      return res.status(500).send({ message: "unable to retrieve data" });
+      return res.status(500).send({ message: "could not update this object" });
     }
   },
 };
