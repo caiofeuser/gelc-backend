@@ -1,45 +1,45 @@
-const Info = require('../models/Info');
+const Info = require("../models/Info");
+const Image = require("../models/Image");
 
 module.exports = {
+  async select(req, res) {
+    try {
+      let info = await Info.findOne().populate("image", "-to -toModel");
 
-	async select(req,res) {
+      if (!info || info === null) {
+        info = await Info.create({});
+      }
 
-		try {
+      res.send(info);
+    } catch (err) {
+      return res.status(500).send({ message: "unable to retrieve data" });
+    }
+  },
 
-			let info = await Info.findOne().populate('image','-to -toModel');
+  async update(req, res) {
+    delete req.body._id;
 
-			if(!info || info ===null) {
-				info = await Info.create({});
-			}
+    try {
+      const info = await Info.findOneAndUpdate({}, req.body, {
+        new: true,
+        runValidators: true,
+      }).populate("image");
 
-			res.send(info);
+      console.log(info._id);
+      
+      // Find the image document referenced in the `to` field of the current `Info` document
+      const image = await Image.findOne({ to: info._id, toModel: "Info" });
+      // console.log(image);
+      if (image) {
+        // Register the found image document in the current `Info` document
+        info.image = image;
+        await info.save();
+      }
 
-		}catch(err) {
-
-			return res.status(500).send({message:'unable to retrieve data'});
-
-		}
-
-	},
-
-	async update(req,res) {
-
-		delete req.body._id;
-
-		delete req.body.image;
-
-		try {
-
-			const info = await Info.findOneAndUpdate({},req.body,{new:true, runValidators:true}).populate('image');
-
-			res.send(info);
-
-		}catch(err) {
-
-			return res.status(500).send({message:'unable to retrieve data'});
-
-		}
-
-	}
-
-}
+      res.send(info);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send({ message: "unable to retrieve data" });
+    }
+  },
+};

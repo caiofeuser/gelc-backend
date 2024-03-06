@@ -1,6 +1,7 @@
 const express = require("express");
-
 // importar controladores
+const Download = require("./models/Download");
+const Image = require("./models/Image");
 const PostController = require("./controllers/PostController");
 const InfoController = require("./controllers/InfoController");
 const ImageController = require("./controllers/ImageController");
@@ -80,6 +81,12 @@ routes.delete(
   ProjectController.remove
 );
 routes.put(
+  "/project/:id",
+  authMiddlewares.validation,
+  authMiddlewares.permission("teacher"),
+  ProjectController.update
+);
+routes.patch(
   "/project/:id",
   authMiddlewares.validation,
   authMiddlewares.permission("teacher"),
@@ -174,4 +181,16 @@ routes.post("/auth", AuthController.login);
 routes.post("/auth/forgotpassword", AuthController.forgotPassword);
 routes.post("/auth/resetpassword", AuthController.resetPassword);
 
+routes.get("/downloads", async (req, res) => {
+  try {
+    // execute query and populate the iamge filed using IMmage model
+    
+    const downloads = await Download.find().populate({path: 'image', model:Image});
+    
+
+    return res.send(downloads);
+  } catch (error) {
+    return res.status(500).send({ message: "Internal Server Error" });
+  }
+});
 module.exports = routes;

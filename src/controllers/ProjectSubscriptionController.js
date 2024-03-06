@@ -1,100 +1,123 @@
-const Project = require('../models/Project');
-const Participant = require('../models/Participant');
+const Project = require("../models/Project");
+const Participant = require("../models/Participant");
 
 module.exports = {
+  async store(req, res) {
+    console.log("store sub");
+    let {
+      projectid: projectId,
+      office,
+      participantemail: participantEmail,
+    } = req.params;
 
-	async store(req,res) {
+    if (
+      office !== "member" &&
+      office !== "secondcoordinator" &&
+      office !== "coordinator"
+    ) {
+      return res
+        .status(400)
+        .send({ message: "there are problems with the data sent" });
+    }
 
-		let { projectid:projectId, office, participantemail:participantEmail} = req.params;
+    try {
+      let project = await Project.findById(projectId);
+      let participant = await Participant.findOne({ email: participantEmail });
 
-		if(office !== 'member' && office !== 'secondcoordinator' && office !== 'coordinator' ) {
+      if (!project || !participant) {
+        return res
+          .status(400)
+          .send({ message: "there are problems with the data sent" });
+      }
 
-			return res.status(400).send({message: 'there are problems with the data sent'});
+      if (project.coordinator || project.secondCoordinator) {
+        let { _id: authParticipantId, permission: authParticipantPermission } =
+          req.jwt;
 
-		}
+        if (
+          authParticipantId != project.coordinator &&
+          authParticipantId != project.secondCoordinator &&
+          authParticipantPermission != "master"
+        ) {
+          return res.status(403).send({ message: "forbidden" });
+        }
+      }
 
-		try {
+      project.addParticipant(participant, office);
+      participant.addProject(project);
 
-			let project = await Project.findById(projectId);
-			let participant = await Participant.findOne({email:participantEmail});
+      await project.save();
+      await participant.save();
+      // project = await project
+      // .populate("members", "email")
+      // .populate("image", "-to -toModel")
+      project.populate([
+        {
+          path: "members",
+          select: "email profile.name profile.lastname",
+        },
+        {
+          path: "image",
+          select: "-to -toModel",
+        },
+      ]);
 
-			if(!project || !participant) {
+      console.log(project);
 
-				return res.status(400).send({message: 'there are problems with the data sent'});
+      return res.send(project);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send({ message: "could not save this object" });
+    }
+  },
 
-			}
+  async remove(req, res) {
+    console.log("remove sub");
+    let { projectid: projectId, participantemail: participantEmail } =
+      req.params;
 
-			if(project.coordinator || project.secondCoordinator) {
+    try {
+      let project = await Project.findById(projectId);
+      let participant = await Participant.findOne({ email: participantEmail });
 
-				let {_id:authParticipantId, permission: authParticipantPermission} = req.jwt;
+      if (!project || !participant) {
+        return res
+          .status(400)
+          .send({ message: "there are problems with the data sent" });
+      }
 
-				if(authParticipantId != project.coordinator && authParticipantId != project.secondCoordinator && authParticipantPermission != 'master') {
+      if (project.coordinator || project.secondCoordinator) {
+        let { _id: authParticipantId, permission: authParticipantPermission } =
+          req.jwt;
 
-					return res.status(403).send({message:'forbidden'});
+        if (
+          authParticipantId != project.coordinator &&
+          authParticipantId != project.secondCoordinator &&
+          authParticipantPermission != "master"
+        ) {
+          return res.status(403).send({ message: "forbidden" });
+        }
+      }
 
-				}
+      project.rmParticipant(participant);
+      participant.rmProject(project);
 
-			}
+      await project.save();
+      await participant.save();
+      project.populate([
+        {
+          path: "members",
+          select: "email",
+        },
+        {
+          path: "image",
+          select: "-to -toModel",
+        },
+      ]);
 
-			project.addParticipant(participant,office);
-			participant.addProject(project);
-
-			await project.save();
-			await participant.save();
-			project = await project.populate('members','email').populate('image','-to -toModel').execPopulate();
-
-			return res.send(project);
-
-		} catch(err) {
-
-			return res.status(500).send({ message: 'could not save this object' });
-
-		}
-
-	},
-
-	async remove(req,res) {
-
-		let { projectid:projectId, participantemail:participantEmail} = req.params;
-
-		try {
-
-			let project = await Project.findById(projectId);
-			let participant = await Participant.findOne({email:participantEmail});
-
-			if(!project || !participant) {
-
-				return res.status(400).send({message: 'there are problems with the data sent'});
-
-			}
-
-			if(project.coordinator || project.secondCoordinator) {
-
-				let {_id:authParticipantId, permission: authParticipantPermission} = req.jwt;
-
-				if(authParticipantId != project.coordinator && authParticipantId != project.secondCoordinator && authParticipantPermission != 'master') {
-
-					return res.status(403).send({message:'forbidden'});
-
-				}
-
-			}
-			
-			project.rmParticipant(participant);
-			participant.rmProject(project);
-
-			await project.save();
-			await participant.save();
-			project = await project.populate('members','email').populate('image','-to -toModel').execPopulate();
-
-			return res.send(project);
-
-		} catch(err) {
-
-			return res.status(500).send({message:'unable to retrieve data'});
-
-		}
-
-	} 
-
-} 
+      return res.send(project);
+    } catch (err) {
+      return res.status(500).send({ message: "unable to retrieve data" });
+    }
+  },
+};
