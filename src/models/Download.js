@@ -16,7 +16,6 @@ const DownloadSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-
     // enderço do arquivo.
     url: {
         type: String,
@@ -36,6 +35,7 @@ const DownloadSchema = new mongoose.Schema({
 // método criado devido a relação com o modelo de imagem, remove a imagem.
 DownloadSchema.methods.addImage = function(image) {
     this.image = image._id;
+    // console.log(this.image);
 }
 
 // método criado devido a relação com o modelo de imagem, adiciona a imagem.

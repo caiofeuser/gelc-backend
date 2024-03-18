@@ -14,13 +14,14 @@ module.exports = {
       let query = search ? { $text: { $search: search } } : {};
 
       let docs = await Download.paginate(query, options);
-
+      // Download.addImage(docs.docs);
       if (!docs || docs.length === 0) {
         return res.status(404).send({ message: "no documents not found" });
       }
 
       return res.send(docs);
     } catch (err) {
+      console.log(err);
       return res.status(500).send({ message: "unable to retrieve data" });
     }
   },
@@ -30,6 +31,7 @@ module.exports = {
 
     try {
       const doc = await Download.findById(id);
+      doc.populate("image", "-to -toModel");
 
       if (!doc) {
         return res.status(404).send({ message: "no documents not found" });
@@ -37,12 +39,14 @@ module.exports = {
 
       return res.send(doc);
     } catch (err) {
+      console.log(err);
       return res.status(500).send({ message: "unable to retrieve data" });
     }
   },
 
   async store(req, res) {
-    let { title, description, url } = req.body;
+    // let { title, description, url, image } = req.body;
+    let { title, description, url, image } = req.body;
 
     if (!title || !description || !url) {
       return res
@@ -51,9 +55,15 @@ module.exports = {
     }
 
     try {
-      let doc = await Download.create({ title, description, url });
+      let doc = await Download.create({
+        title: title,
+        description: description,
+        url: url,
+        image: image || null,
+      });
       return res.status(201).send(doc);
     } catch (err) {
+      console.log(err);
       return res.status(500).send({ message: "could not save this object" });
     }
   },
@@ -70,6 +80,7 @@ module.exports = {
 
       return res.send();
     } catch (err) {
+      console.log(err);
       return res.status(500).send({ message: "unable to retrieve data" });
     }
   },
@@ -77,26 +88,19 @@ module.exports = {
   async update(req, res) {
     let id = req.params.id;
 
-    delete req.body._id;
-
-    delete req.body.createdAt;
-
-    delete req.body.updatedAt;
-
-    delete req.body.image;
-
     try {
       let doc = await Download.findByIdAndUpdate(id, req.body, {
         new: true,
         runValidators: true,
       });
 
-      if (!doc) {
-        return res.status(404).send({ message: "no documents not found" });
-      }
+      await doc.save();
+
+      doc.populate([{ path: "image", select: "-to -toModel" }]);
 
       return res.send(doc);
     } catch (err) {
+      console.log(err);
       return res.status(500).send({ message: "unable to retrieve data" });
     }
   },
