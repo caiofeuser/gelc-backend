@@ -116,53 +116,57 @@ module.exports = {
 
   async update(req, res) {
     let id = req.params.id;
-  
+    
+
     try {
       let doc = await Post.findById(id);
-  
+
       if (!doc) {
         return res.status(404).send({ message: "no documents not found" });
       }
-  
-      let { _id: authParticipantId, permission: authParticipantPermission } = req.jwt;
-  
-      if (doc.author != authParticipantId && authParticipantPermission !== "master") {
+
+      let { _id: authParticipantId, permission: authParticipantPermission } =
+        req.jwt;
+
+      if (
+        doc.author != authParticipantId &&
+        authParticipantPermission !== "master"
+      ) {
         return res.status(403).send({ message: "forbidden" });
       }
-  
+
       if (req.body.title) {
         doc.title = req.body.title;
       }
-  
+
       if (req.body.description) {
         doc.description = req.body.description;
       }
-  
+
       if (req.body.content) {
         doc.content = req.body.content;
       }
-  
+
       if (req.body.accepted && authParticipantPermission === "master") {
         doc.accepted = req.body.accepted;
       }
-  
+
       if (req.body.image) {
         doc.image = req.body.image;
       }
-  
+
       await doc.save();
-  
+
       // Use an array of objects to populate multiple fields
       doc.populate([
         { path: "author", select: "email profile" },
         { path: "image", select: "-to -toModel" },
-      ])
-  
+      ]);
+
       return res.send(doc);
     } catch (err) {
       console.log(err);
       return res.status(500).send({ message: "unable to retrieve data" });
     }
   },
-  
 };

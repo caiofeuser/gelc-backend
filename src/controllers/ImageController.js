@@ -128,6 +128,16 @@ module.exports = {
         resolution = { width: 200, height: 200 };
         break;
 
+      case "tool":
+        if (authParticipantPermission !== "master") {
+          fs.unlinkSync(req.file.path);
+          return res.status(403).send({ message: "forbidden" });
+        }
+
+        toModel = "Tool";
+        resolution = { width: 200, height: 200 };
+        break;
+
       default:
         fs.unlinkSync(req.file.path);
         return res
@@ -206,6 +216,12 @@ module.exports = {
             return res.status(403).send({ message: "forbidden" });
           }
           break;
+
+        case "Tool":
+          if (authParticipantPermission !== "master") {
+            return res.status(403).send({ message: "forbidden" });
+          }
+          break;
       }
 
       // Remove the document using Mongoose's deleteOne method
@@ -269,6 +285,12 @@ module.exports = {
           break;
 
         case "Download":
+          if (authParticipantPermission !== "master") {
+            return res.status(403).send({ message: "forbidden" });
+          }
+          break;
+
+        case "Tool":
           if (authParticipantPermission !== "master") {
             return res.status(403).send({ message: "forbidden" });
           }

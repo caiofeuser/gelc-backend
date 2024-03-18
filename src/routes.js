@@ -10,7 +10,7 @@ const ProjectController = require("./controllers/ProjectController");
 const ProjectSubscriptionController = require("./controllers/ProjectSubscriptionController");
 const AuthController = require("./controllers/AuthController");
 const DownloadController = require("./controllers/DownloadController");
-const ToolsController = require("./controllers/ToolsController");
+const ToolController = require("./controllers/ToolController");
 // importar middlewares
 const authMiddlewares = require("./middlewares/auth");
 const uploadMiddlewares = require("./middlewares/upload");
@@ -156,41 +156,43 @@ routes.post(
   DownloadController.store
 );
 
-routes.get("/tools", ToolsController.index);
-routes.get("/tools/:id", ToolsController.select);
+routes.get("/tool", ToolController.index);
+routes.get("/tool/:id", ToolController.select);
 routes.delete(
-  "/tools/:id",
+  "/tool/:id",
   authMiddlewares.validation,
   authMiddlewares.permission("master"),
-  ToolsController.remove
+  ToolController.remove
 );
 routes.put(
-  "/tools/:id",
+  "/tool/:id",
   authMiddlewares.validation,
   authMiddlewares.permission("master"),
-  ToolsController.update
+  ToolController.update
 );
 routes.post(
-  "/tools",
+  "/tool",
   authMiddlewares.validation,
   authMiddlewares.permission("master"),
-  ToolsController.store
+  ToolController.store
 );
 
 routes.post("/auth", AuthController.login);
 routes.post("/auth/forgotpassword", AuthController.forgotPassword);
 routes.post("/auth/resetpassword", AuthController.resetPassword);
 
-routes.get("/downloads", async (req, res) => {
-  try {
-    // execute query and populate the iamge filed using IMmage model
-    
-    const downloads = await Download.find().populate({path: 'image', model:Image});
-    
+// routes.get("/downloads", async (req, res) => {
+//   try {
+//     // execute query and populate the iamge filed using IMmage model
 
-    return res.send(downloads);
-  } catch (error) {
-    return res.status(500).send({ message: "Internal Server Error" });
-  }
-});
+//     const downloads = await Download.find().populate({
+//       path: "image",
+//       model: Image,
+//     });
+
+//     return res.send(downloads);
+//   } catch (error) {
+//     return res.status(500).send({ message: "Internal Server Error" });
+//   }
+// });
 module.exports = routes;

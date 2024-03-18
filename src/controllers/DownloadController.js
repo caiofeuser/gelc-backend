@@ -94,22 +94,6 @@ module.exports = {
         runValidators: true,
       });
 
-      // if (req.body.title) {
-      //   doc.title = req.body.title;
-      // }
-
-      // if (req.body.description) {
-      //   doc.description = req.body.description;
-      // }
-
-      // if (req.body.image) {
-      //   doc.image = req.body.image;
-      // }
-
-      // if (!doc) {
-      //   return res.status(404).send({ message: "no documents not found" });
-      // }
-
       await doc.save();
 
       doc.populate([{ path: "image", select: "-to -toModel" }]);
