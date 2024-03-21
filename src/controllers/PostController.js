@@ -106,17 +106,17 @@ module.exports = {
         }
       }
 
-      await doc.remove();
+      await Post.deleteOne({ _id: id });
 
       return res.send();
     } catch (err) {
+      console.log(err);
       return res.status(500).send({ message: "unable to retrieve data" });
     }
   },
 
   async update(req, res) {
     let id = req.params.id;
-    
 
     try {
       let doc = await Post.findById(id);
