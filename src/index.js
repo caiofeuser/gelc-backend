@@ -21,13 +21,20 @@ app.use(express.json());
 // utilizar parâmetros pela url
 app.use(express.urlencoded({ extended: true }));
 
-//usa as rotas
-app.use(require("./routes"));
+// Middleware to handle CORS headers for image requests
+app.use("/uploads", (req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  next();
+});
 
+// Serve static images
 app.use(
   "/uploads",
   express.static(path.resolve(__dirname, "..", "uploads", "resized"))
 );
+
+//usa as rotas
+app.use(require("./routes"));
 
 //define a porta com a variavel que tem acesso ao protocolo http
 app.listen(config.app.PORT);
