@@ -24,9 +24,9 @@ module.exports = {
 
   cors: {
     WHITE:
-      process.env.CORSWHITE ||
-      "http://localhost:3000" ||
       "gelc-frontend.vercel.app" ||
-      "www.gelc.com.br",
+      "www.gelc.com.br" ||
+      process.env.CORSWHITE ||
+      "http://localhost:3000",
   },
 };
