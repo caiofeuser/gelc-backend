@@ -13,7 +13,7 @@ const app = express();
 mongoose.connect(config.mongo.URL);
 
 //backend pode ser acessado pelo frontend em mesmo estando em dominios diferentes
-app.use(cors({ origin: config.cors.WHITE }));
+app.use(cors({ origin: "*" }));
 
 // enviar dados como json
 app.use(express.json());
