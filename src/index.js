@@ -15,6 +15,16 @@ mongoose.connect(config.mongo.URL);
 //backend pode ser acessado pelo frontend em mesmo estando em dominios diferentes
 app.use(cors({ origin: "*" }));
 
+app.options(
+  "/image/info/*",
+  cors({
+    origin: "*", // Permitir apenas solicitações de 'https://www.gelc.com.br'
+    methods: "*", // Permitir apenas solicitações POST
+    allowedHeaders: "*", // Permitir cabeçalhos específicos
+    credentials: true, // Permitir credenciais
+  })
+);
+
 // enviar dados como json
 app.use(express.json());
 
